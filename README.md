@@ -23,4 +23,8 @@
 
 ## Notes ##
 - I'm not a front-end developer, so it's not pretty.
+<<<<<<< HEAD
 - I'm also not a developer so it's rough, as in it was written for my understanding rather than simplicity. 
+=======
+- I'm also not a developer so it's rough, as in it was written for my understanding rather than simplicity. 
+>>>>>>> 1b37bd6f2355dc5d145ae003c1d01e4b768185ac
