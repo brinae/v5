@@ -50,7 +50,9 @@ def create_app():
         return (loggedIn, firstName, noOfItems)
 
 
-    # Routes:
+    ## Routes: ##
+
+    # Home page
     @app.route("/")
     def root():
         loggedIn, firstName, noOfItems = getLoginDetails()
@@ -61,6 +63,7 @@ def create_app():
         itemData = parse(itemData)   
         return render_template('home.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems)
 
+    # UI to add product to the items table
     @app.route("/add")
     def admin():
         with sqlite3.connect('database.db') as conn:
@@ -68,6 +71,7 @@ def create_app():
         conn.close()
         return render_template('add.html')
 
+    # Adds product to the items table in database.db
     @app.route("/addItem", methods=["GET", "POST"])
     def addItem():
         if request.method == "POST":
@@ -94,6 +98,7 @@ def create_app():
             print(msg)
             return redirect('/')
 
+    # UI to remove item from items table
     @app.route("/remove")
     def remove():
         with sqlite3.connect('database.db') as conn:
@@ -103,6 +108,7 @@ def create_app():
         conn.close()
         return render_template('remove.html', data=data)
 
+    # Removes item from items table
     @app.route("/removeItem")
     def removeItem():
         productId = request.args.get('productId')
@@ -119,7 +125,7 @@ def create_app():
         print(msg)
         return redirect(url_for('root'))
 
-
+    # To view user profile. Following functions allow edits to profile. 
     @app.route("/account/profile")
     def profileHome():
         if 'email' not in session:
@@ -196,6 +202,7 @@ def create_app():
             con.close()
             return redirect(url_for('editProfile'))
 
+    # UI to log in - also shows rows from users table
     @app.route("/loginForm")
     def loginForm():
         if 'email' in session:
@@ -208,6 +215,7 @@ def create_app():
             conn.close()
             return render_template('login.html', userData = users, error='')
 
+    # Logs in a user (starts flask session)
     @app.route("/login", methods = ['POST', 'GET'])
     def login():
         if request.method == 'POST':
@@ -220,6 +228,7 @@ def create_app():
                 error = 'Invalid UserId / Password'
                 return render_template('login.html', error=error)
 
+    # Product description page
     @app.route("/productDescription")
     def productDescription():
         loggedIn, firstName, noOfItems = getLoginDetails()
@@ -231,6 +240,7 @@ def create_app():
         conn.close()
         return render_template("productDescription.html", data=productData, loggedIn = loggedIn, firstName = firstName, noOfItems = noOfItems)
 
+    # Adds an item to the cart table
     @app.route("/addToCart")
     def addToCart():
         if 'email' not in session:
@@ -251,12 +261,14 @@ def create_app():
             conn.close()
             return redirect(url_for('root'))
 
+    # Shows a cart page and loads the payment options
     @app.route("/cart")
     def cart():
         if 'email' not in session:
             return redirect(url_for('loginForm'))
         loggedIn, firstName, noOfItems = getLoginDetails()
         email = session['email']
+        print("\nUser %s's Cart!" %(firstName))
         with sqlite3.connect('database.db') as conn:
             cur = conn.cursor()
             cur.execute("SELECT country FROM users WHERE email = ?", (email, ))
@@ -276,10 +288,10 @@ def create_app():
         for row in products:
             totalPrice += row[2]
         availablePaymentMethods = getPaymentMethods(totalPrice, reference, country, currency, shopperReference)
-        print("AVAILABLE PAYMENT METHODS")
-        print(availablePaymentMethods)
+        print("\nAVAILABLE PAYMENT METHODS: %s" %(availablePaymentMethods))
         return render_template("cart.html", products = products, totalPrice=totalPrice, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, client_key=get_adyen_client_key(), paymentMethods = availablePaymentMethods)
 
+    # Removes an item from the cart table
     @app.route("/removeFromCart")
     def removeFromCart():
         if 'email' not in session:
@@ -300,11 +312,13 @@ def create_app():
         conn.close()
         return redirect(url_for('root'))
 
+    # Logs out a user (ends flask session)
     @app.route("/logout")
     def logout():
         session.pop('email', None)
         return redirect(url_for('root'))
 
+    # Confirms that the log in info is valid
     def is_valid(email, password):
         con = sqlite3.connect('database.db')
         cur = con.cursor()
@@ -315,6 +329,7 @@ def create_app():
                 return True
         return False
 
+    # Creates a row in the users table based on input. Where #1 Shopper Reference is created. 
     @app.route("/register", methods = ['GET', 'POST'])
     def register():
         if request.method == 'POST':
@@ -332,8 +347,8 @@ def create_app():
             country = request.form['country']
             phone = request.form['phone']
             currency = request.form['currency']
-            shopperReference =  (''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6)))
-
+            shopperReference =  (''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))) #1 Create Shopper Reference when account is created
+            print("\nShopper Reference %s Created!" %(shopperReference))
             with sqlite3.connect('database.db') as con:
                 try:
                     cur = con.cursor()
@@ -348,16 +363,21 @@ def create_app():
             con.close()
             return render_template("login.html", error=msg)
 
+    # UI to register
     @app.route("/registerationForm")
     def registrationForm():
         return render_template("register.html")
 
+    # Loads the coomponents needed for checkout - when you click on your payment option from the cart page
     @app.route('/checkout/<integration>')
     def checkout(integration):
         global method
         method = integration
+        print("\nIntegration type %s Chosen" %(method))
+        print("Loading Component page")
         return render_template('component.html', method=integration, client_key=get_adyen_client_key())
 
+    # Gets the available payment methods based on shopper data
     @app.route('/api/getPaymentMethods', methods=['GET', 'POST'])
     def get_payment_methods():
         if 'email' not in session:
@@ -383,6 +403,7 @@ def create_app():
         pm = getPaymentMethods2(totalPrice, reference, country, currency, shopperReference)
         return pm
 
+    # Passes info to the /payments request
     @app.route('/api/initiatePayment', methods=['POST'])
     def initiate_payment():
         host_url = request.host_url
@@ -409,13 +430,14 @@ def create_app():
         country = record[9]
         currency = record[10]
         shopperReference = record[11]       
-        print("Does Initiate Payment Run?")
         return adyen_payments(request, host_url, email, amount, firstName, lastName, houseNumber, street, address2, zipcode, city, state, country, reference, currency, shopperReference)
 
+    # Gets additonal details from /payment/details request
     @app.route('/api/submitAdditionalDetails', methods=['POST'])
     def payment_details():
         return get_payment_details(request)
 
+    # Redirect logic
     @app.route('/api/handleShopperRedirect', methods=['POST', 'GET'])
     def handle_redirect():
         values = request.values.to_dict()  # Get values from query params in request object
@@ -436,31 +458,7 @@ def create_app():
         else:
             return redirect(url_for('checkout_failure'))
 
-
-    # @app.route('/api/sessions', methods=['POST'])
-    # def sessions():
-        # host_url = request.host_url
-        # with sqlite3.connect('database.db') as conn:
-        #     cur = conn.cursor()
-        #     loggedIn = True
-        #     cur.execute("SELECT userId, firstName, lastName, houseNumber, street, address2, zipcode, city, state, country, currency, shopperReference FROM users WHERE email = ?", (session['email'], ))
-        #     record = cur.fetchone()
-        # conn.close()
-        # amount = totalPrice
-        # email = session['email']
-        # firstName = record[1]
-        # lastName = record[2]
-        # houseNumber = record[3]
-        # street = record[4]
-        # address2 = record[5]
-        # zipcode = record[6]
-        # city = record[7]
-        # state = record[8]
-        # country = record[9]
-        # currency = record[10]
-        # shopperReference = record[11]
-        # return adyen_sessions(host_url, email, amount, firstName, lastName, houseNumber, street, address2, zipcode, city, state, country, reference, currency, shopperReference)
-
+    # Below are various results:
     @app.route('/result/success', methods=['GET'])
     def checkout_success():
         return render_template('checkout-success.html')
@@ -488,31 +486,31 @@ def create_app():
         return send_from_directory(os.path.join(app.root_path, 'static'),
                                     'img/favicon.ico')
 
-
     # Process incoming webhook notifications
-    @app.route('/notifications', methods=['POST'])
-    def webhook_notifications():
-        """
-        Receives outcome of each payment
-        :return:
-        """
-        notifications = request.json['notificationItems']
-        print(notifications)
-        # for notification in notifications:
-        #     if is_valid_hmac_notification(notification['NotificationRequestItem'], get_adyen_hmac_key()) :
-        #         print(f"merchantReference: {notification['NotificationRequestItem']['merchantReference']} "
-        #               f"result? {notification['NotificationRequestItem']['success']}")
-        #     else:
-        #         # invalid hmac: do not send [accepted] response
-        #         raise Exception("Invalid HMAC signature")
+    # @app.route('/notifications', methods=['POST'])
+    # def webhook_notifications():
+    #     """
+    #     Receives outcome of each payment
+    #     :return:
+    #     """
+    #     notifications = request.json['notificationItems']
+    #     print(notifications)
+    #     # for notification in notifications:
+    #     #     if is_valid_hmac_notification(notification['NotificationRequestItem'], get_adyen_hmac_key()) :
+    #     #         print(f"merchantReference: {notification['NotificationRequestItem']['merchantReference']} "
+    #     #               f"result? {notification['NotificationRequestItem']['success']}")
+    #     #     else:
+    #     #         # invalid hmac: do not send [accepted] response
+    #     #         raise Exception("Invalid HMAC signature")
 
-        # return '[accepted]'
-        return notifications
+    #     # return '[accepted]'
+    #     return notifications
 
     def allowed_file(filename):
         return '.' in filename and \
                 filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+    # Used to show items on home page
     def parse(data):
         ans = []
         i = 0
@@ -526,7 +524,6 @@ def create_app():
             ans.append(curr)
         return ans
 
-    
 
     return app
 

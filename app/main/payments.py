@@ -43,18 +43,17 @@ def adyen_payments(request, host_url, email, amount, firstName, lastName, houseN
 	'threeDS2RequestData': {
 		'deviceChannel': 'app',
 		'threeDSRequestorChallengeInd': "03"
-
 	}
 	}
 	payments_request.update(payment_info)
 	
 
-	print("/payments request:\n" + str(payments_request))
+	print("\npayments request:\n%s"  %(payments_request))
 
 	payments_response = adyen.checkout.payments(payments_request)
 	formatted_response = json.dumps((json.loads(payments_response.raw_response)))
 
-	print("/payments response:\n" + formatted_response)
+	print("\n/payments response:\n%s"  %(formatted_response))
 	return formatted_response
 
 

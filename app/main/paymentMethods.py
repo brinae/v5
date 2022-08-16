@@ -21,15 +21,9 @@ def getPaymentMethods(amount, reference, country, currency, shopperReference):
     request['shopperReference'] = shopperReference
 
     result = adyen.checkout.payment_methods(request)
-    print(result)
-    print(type(result))
     formatted_response = json.dumps((json.loads(result.raw_response)), sort_keys=True, indent=4)
-    print("/paymentMethods response:\n" + formatted_response)
-    print(type(formatted_response))
 
     paymentMethods = json.loads(formatted_response)
-    print(paymentMethods)
-    print(type(paymentMethods))
     pM = paymentMethods['paymentMethods']
     pMTypelist = [d['type'] for d in pM]
     pMNamelist = [d['name'] for d in pM]

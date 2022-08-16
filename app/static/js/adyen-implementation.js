@@ -3,10 +3,11 @@ const type = JSON.parse(document.getElementById('integration-type').innerHTML);
 console.log(type)
 
 async function startCheckout() {
+	console.log("\nCheckout Started.")
     try {
         const checkout = await createAdyenCheckout()
-        console.log('Checkout Object (Configuration):', checkout)
-
+        console.log('\nCheckout Object (Configuration):\n', checkout)
+		console.log("\nMounting Component.")
         const component = checkout.create(type).mount("#component");
 	} catch (error) {
 		console.error(error);
@@ -16,7 +17,7 @@ async function startCheckout() {
 
 // Start the Checkout workflow
 async function createAdyenCheckout() {
-
+	console.log("\nCreating Configuration Object.")
     const paymentMethodsResponse = await callServer("/api/getPaymentMethods");
     const configuration = {
         paymentMethodsResponse,
@@ -46,17 +47,20 @@ async function createAdyenCheckout() {
             }
         },
         onSubmit: (state, component) => {
+			console.log("\nPayment info submitted")
             console.log(state);
 
             if (state.isValid) {
+				console.log("\n Handling submission, and reaching out to server to initiate payment.")
                 handleSubmission(state, component, "/api/initiatePayment");
             }
         },
         onAdditionalDetails: (state, component) => {
+			console.log("\n Handling additional details, and reaching out to server to make /payment/details request.")
             handleSubmission(state, component, "/api/submitAdditionalDetails");
         }
     };
-    console.log("Configuration: ", configuration)
+    console.log("\nConfiguration: \n", configuration)
     return new AdyenCheckout(configuration);
 }
 
