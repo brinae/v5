@@ -7,6 +7,7 @@ from main.payments import *
 from main.redirect import *
 from main.additional_details import *
 from main.config import *
+from main.mods import *
 from main.paymentMethods import *
 from main.paymentMethods2 import *
 from werkzeug.utils import secure_filename
@@ -287,6 +288,7 @@ def create_app():
         totalPrice = 0
         for row in products:
             totalPrice += row[2]
+        totalPrice = round(totalPrice, 2)
         availablePaymentMethods = getPaymentMethods(totalPrice, reference, country, currency, shopperReference)
         print("\nAVAILABLE PAYMENT METHODS: %s" %(availablePaymentMethods))
         return render_template("cart.html", products = products, totalPrice=totalPrice, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, client_key=get_adyen_client_key(), paymentMethods = availablePaymentMethods)
@@ -400,6 +402,7 @@ def create_app():
         totalPrice = 0
         for row in products:
             totalPrice += row[2]
+        totalPrice = round(totalPrice, 2)
         pm = getPaymentMethods2(totalPrice, reference, country, currency, shopperReference)
         return pm
 
@@ -486,25 +489,26 @@ def create_app():
         return send_from_directory(os.path.join(app.root_path, 'static'),
                                     'img/favicon.ico')
 
-    # Process incoming webhook notifications
-    # @app.route('/notifications', methods=['POST'])
-    # def webhook_notifications():
-    #     """
-    #     Receives outcome of each payment
-    #     :return:
-    #     """
-    #     notifications = request.json['notificationItems']
-    #     print(notifications)
-    #     # for notification in notifications:
-    #     #     if is_valid_hmac_notification(notification['NotificationRequestItem'], get_adyen_hmac_key()) :
-    #     #         print(f"merchantReference: {notification['NotificationRequestItem']['merchantReference']} "
-    #     #               f"result? {notification['NotificationRequestItem']['success']}")
-    #     #     else:
-    #     #         # invalid hmac: do not send [accepted] response
-    #     #         raise Exception("Invalid HMAC signature")
+    @app.route('/mod', methods=['POST', 'GET'])
+    def modUI():
+        return render_template("mods.html")
 
-    #     # return '[accepted]'
-    #     return notifications
+    @app.route('/modifications', methods=['POST', 'GET'])
+    def mods():
+        if request.method == 'POST':
+            #Parse form data    
+            global pspReference
+            global modAmount
+            global modReference
+            global modType
+            global modCurrency
+            modType = request.form['modType']
+            pspReference = request.form['pspReference']
+            modAmount = request.form['modAmount']
+            modCurrency = request.form['modCurrency']
+            modReference = request.form['modReference']
+            return adyen_modifications(modType, pspReference, modAmount, modCurrency, modReference)
+
 
     def allowed_file(filename):
         return '.' in filename and \

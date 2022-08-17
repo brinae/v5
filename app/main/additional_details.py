@@ -11,10 +11,10 @@ def get_payment_details(frontend_request):
 
     details_request = frontend_request.get_json()
 
-    print("/payments/details request:\n" + str(details_request))
+    print("\n/payments/details request:\n" + str(details_request))
 
     details_response = adyen.checkout.payments_details(details_request)
     formatted_response = json.loads(details_response.raw_response)
 
-    print("payments/details response:\n" + str(formatted_response))
+    print("\npayments/details response:\n" + str(formatted_response))
     return formatted_response

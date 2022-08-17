@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+<div>
+
+<form action="/modifications" method="POST">
+
+    <label for="modType">Choose a modification:</label>
+    <select name="modType" id="modType">
+        <option value="capture">Capture</option>
+        <option value="cancel">Cancel</option>
+        <option value="refund">Refund</option>
+        <option value="reversal">Reversal</option>
+    </select>
+    <h6>Please note that a reversal must be for the full amount.</h6><br>
+    <p>PSP Reference: <input type="text" name="pspReference"></p>
+
+    <p>Modification Amount: <input type="text" name="modAmount"></p>
+    <p>Modification Currency: <input type="text" name="modCurrency"></p> 
+    <p>Modification Reference for Shopper <input type="text" name="modReference"></p>
+    <p><input type="submit" value="Submit"></p>
+
+    <!-- <a href='/api/initiateModification'>Submit</a> -->
+</form>
+</div>
+
+{% endblock %}
+
+
+

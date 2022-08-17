@@ -22,7 +22,6 @@ def getPaymentMethods(amount, reference, country, currency, shopperReference):
 
     result = adyen.checkout.payment_methods(request)
     formatted_response = json.dumps((json.loads(result.raw_response)), sort_keys=True, indent=4)
-
     paymentMethods = json.loads(formatted_response)
     pM = paymentMethods['paymentMethods']
     pMTypelist = [d['type'] for d in pM]
@@ -32,6 +31,17 @@ def getPaymentMethods(amount, reference, country, currency, shopperReference):
         for value in pMTypelist:
             res[key] = value
             pMTypelist.remove(value)
-            break  
+            break
+    if 'storedPaymentMethods' in paymentMethods.keys():
+        spM = paymentMethods['storedPaymentMethods']
+        spMTypelist = [d['brand'] for d in spM]
+        spMNamelist = [d['lastFour'] for d in spM]
+        i = 0
+        for key in spMNamelist:
+            for value in spMTypelist:
+                res.update({key: i})
+                i =  i + 1
+                spMTypelist.remove(value)
+                break
 
     return res

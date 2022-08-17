@@ -1,14 +1,24 @@
 const clientKey = JSON.parse(document.getElementById('client-key').innerHTML);
 const type = JSON.parse(document.getElementById('integration-type').innerHTML);
-console.log(type)
+const chosenPM = type;
 
 async function startCheckout() {
+	console.log("!!!!!!!!", type)
 	console.log("\nCheckout Started.")
     try {
         const checkout = await createAdyenCheckout()
+		console.log("\n stored methods: ", checkout.paymentMethodsResponse.storedPaymentMethods)
         console.log('\nCheckout Object (Configuration):\n', checkout)
 		console.log("\nMounting Component.")
-        const component = checkout.create(type).mount("#component");
+		if (isNaN(type)){
+			const component = checkout.create(type).mount("#component");
+
+		}
+		else {
+			const storedPaymentMethod = checkout.paymentMethodsResponse.storedPaymentMethods[chosenPM];
+			const card = checkout.create("card", storedPaymentMethod).mount("#component");
+
+		}
 	} catch (error) {
 		console.error(error);
 		alert("Error occurred. Look at console for details");
@@ -30,14 +40,15 @@ async function createAdyenCheckout() {
                 showImage: true
             },
             card: {
-                hasHolderName: false,
+                hasHolderName: true,
                 holderNameRequired: true,
                 //billingAddressRequired: false,
                 name: "Credit or Debit card",
                 enableStoreDetails: true,
+				billingAddressRequired: false,
                 brands: ['mc', 'visa', 'amex', 'bcmc', 'cartebancaire', 'diners', 'discover', 'elo', 'hiper', 'jcb', 'maestro'],
                 storedCard: {
-                    //hideCVC: true
+                    //hideCVC: true,
                 }
             },
             paypal: {
@@ -133,7 +144,8 @@ function filterUnimplemented(pm) {
 			"klarna",
 			"klarna_account",
 			"paypal",
-			"boletobancario_santander"
+			"boletobancario_santander",
+			"storedPaymentMethods"
 		].includes(it.type)
 	);
 	return pm;
