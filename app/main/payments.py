@@ -40,7 +40,7 @@ def adyen_payments(request, host_url, email, amount, firstName, lastName, houseN
             'threeDSRequestData': {
                 'nativeThreeDS': 'preferred'
             }
-            # 'attemptAuthentication': 'always'
+            # 'attemptAuthentication': 'always'  USED FOR REDIRECT METHOD. 
         },
         # 'threeDS2RequestData': {
         #     'deviceChannel': 'app',

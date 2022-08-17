@@ -1,6 +1,24 @@
 {% extends "layout.html" %}
 {% block content %}
-
+<head>
+	<style>
+		table {
+		  font-family: arial, sans-serif;
+		  border-collapse: collapse;
+		  width: 100%;
+		}
+		
+		td, th {
+		  border: 1px solid #dddddd;
+		  text-align: left;
+		  padding: 8px;
+		}
+		
+		tr:nth-child(even) {
+		  background-color: #dddddd;
+		}
+		</style>
+</head>
 <div class="container">
 	
 	<meta charset="UTF-8">
@@ -28,7 +46,7 @@
 		<p><a href="https://docs.adyen.com/development-resources/testing/test-card-numbers#credit-and-debit-cards">All from Adyen.com</a></p>
 		<table>
 			<tr>
-				<th>Brand</th>
+			  <th>Brand</th>
 			  <th>PAN</th>
 			  <th>Expiry</th>
 			  <th>CVV</th>
@@ -115,14 +133,6 @@
 			  <td>Enrolled</td>
 			  <td>GB</td>
 			</tr>  
-			<tr>
-				<td>Elo</td>
-			  <td>5066 9911 1111 1118</td>
-			  <td>03/30</td>
-			  <td>737</td>
-			  <td>Not Enrolled</td>
-			  <td>BR</td>
-			</tr>
 			
 		  </table>
 		

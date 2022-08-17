@@ -46,7 +46,7 @@ async function createAdyenCheckout() {
                 name: "Credit or Debit card",
                 enableStoreDetails: true,
 				billingAddressRequired: false,
-                brands: ['mc', 'visa', 'amex', 'bcmc', 'cartebancaire', 'diners', 'discover', 'elo', 'hiper', 'jcb', 'maestro'],
+                brands: ['mc', 'visa', 'amex', 'bcmc', 'cartebancaire', 'diners', 'discover', 'jcb', 'maestro'],
                 storedCard: {
                     //hideCVC: true,
                 }
